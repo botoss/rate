@@ -22,7 +22,7 @@ public class Consumer {
             ConsumerRecords<String, String> records = consumer.poll(100);
             for (ConsumerRecord<String, String> record : records) {
                 if (((new JSONObject(record.value())).getString("command")).equals("курс")) {
-                    MyProducer.rate(record.key(), (new JSONObject(record.value())).getString("connector-id"));
+                    MyProducer.rate(record.key(), new JSONObject(record.value()));
                 }
             }
         }

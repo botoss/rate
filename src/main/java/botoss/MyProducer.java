@@ -7,6 +7,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.kafka.common.serialization.DoubleDeserializer;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -16,7 +17,7 @@ import java.util.Properties;
 
 
 public class MyProducer {
-    public static void rate(String key, String connectorName) {
+    public static void rate(String key, JSONObject jobj) {
         Properties props = new Properties();
         props.put("bootstrap.servers", "192.168.1.64:9092");
         props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
@@ -30,13 +31,19 @@ public class MyProducer {
         }
         JSONArray arr = (new JSONObject(s)).getJSONObject("query").getJSONObject("results").getJSONArray("rate");
         String text = "";
+        JSONArray params = jobj.getJSONArray("params");
+        Double param = 1.;
+        try{
+            if (params.length() > 0)
+                param = Double.parseDouble(params.get(0).toString());
+        } catch(NumberFormatException ignore) {}
         for (int i = 0; i < arr.length(); i++) {
             text += arr.getJSONObject(i).getString("Name") + ": ";
-            text += arr.getJSONObject(i).getString("Rate") + "\n";
+            text += Double.toString((Math.round(Double.parseDouble(arr.getJSONObject(i).getString("Rate")) * param * 1000))/1000.) + "\n";
         }
         org.apache.kafka.clients.producer.Producer<String, String> producer = new KafkaProducer<>(props);
-        JSONObject ans = new JSONObject().put("connector-id", connectorName).put("text", text);
-        producer.send(new ProducerRecord<>("to-connector",  key, ans.toString()));
+        JSONObject ans = new JSONObject().put("connector-id", jobj.getString("connector-id")).put("text", text);
+        producer.send(new ProducerRecord<>("to-connector", key, ans.toString()));
 
         producer.close();
     }
