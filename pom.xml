@@ -37,7 +37,7 @@
                             <build>
                                 <from>java:8</from>
                                 <cmd>
-                                    <shell>java -cp 'lib/*' botoss.Consumer</shell>
+                                    <shell>java -cp 'maven/lib/*' botoss.Consumer</shell>
                                 </cmd>
                                 <assembly>
                                     <inline>
