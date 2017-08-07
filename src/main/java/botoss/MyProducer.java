@@ -13,17 +13,16 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.util.Properties;
 
 
 public class MyProducer {
-    public static void rate(String key, JSONObject jobj) {
+    public static void rate(String key, JSONObject jobj) throws IOException {
         Properties props = new Properties();
-        props.put("bootstrap.servers", "localhost:9092");
-        props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
-        props.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
+        try (Reader propsReader = new FileReader("/kafka.properties")) {
+            props.load(propsReader);
+        }
         String s = "";
         try {
             logger.debug("curling yahooapis");
