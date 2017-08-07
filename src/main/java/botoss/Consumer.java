@@ -28,11 +28,18 @@ public class Consumer {
             ConsumerRecords<String, String> records = consumer.poll(100);
             for (ConsumerRecord<String, String> record : records) {
                 logger.info("record from topic: key = " + record.key() + "; value = " + record.value());
-                if (((new JSONObject(record.value())).getString("command")).equals("курс")) {
+                String command = (new JSONObject(record.value())).getString("command");
+                if (rateCommand(command)) {
                     MyProducer.rate(record.key(), new JSONObject(record.value()));
                 }
             }
         }
+    }
+
+    private static boolean rateCommand(String command) {
+        return "курс".equals(command) ||
+                "rate".equals(command) ||
+                "kurs".equals(command);
     }
 
     private static final Logger logger = LoggerFactory.getLogger(Consumer.class);
