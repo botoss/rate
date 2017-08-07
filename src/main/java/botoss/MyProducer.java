@@ -9,6 +9,7 @@ import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.serialization.DoubleDeserializer;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,7 +47,13 @@ public class MyProducer {
         }
         org.apache.kafka.clients.producer.Producer<String, String> producer = new KafkaProducer<>(props);
         logger.debug("producer created");
-        JSONObject ans = new JSONObject().put("connector-id", jobj.getString("connector-id")).put("text", text);
+        JSONObject ans = new JSONObject();
+        try {
+            ans.put("connector-id", jobj.getString("connector-id"));
+        } catch (JSONException ignore) {
+            // it's ok for now not to have connector-id in message
+        }
+        ans.put("text", text);
         producer.send(new ProducerRecord<>("to-connector", key, ans.toString()));
         logger.debug("producer send request created");
 
