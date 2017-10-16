@@ -10,8 +10,10 @@ import org.slf4j.LoggerFactory;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Properties;
+import java.util.concurrent.TimeUnit;
 
 public class Consumer {
     public static void main(String[] args) throws IOException {
@@ -23,23 +25,28 @@ public class Consumer {
         KafkaConsumer<String, String> consumer = new KafkaConsumer<>(props);
         consumer.subscribe(Arrays.asList("to-module"));
         logger.info("Subscribed to topic");
-
+        new Thread(() -> {
+            try {
+                RateProducer.rate();
+                TimeUnit.MINUTES.sleep(10);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }).start();
         while (true) {
             ConsumerRecords<String, String> records = consumer.poll(100);
             for (ConsumerRecord<String, String> record : records) {
                 logger.info("record from topic: key = " + record.key() + "; value = " + record.value());
                 String command = (new JSONObject(record.value())).getString("command");
                 if (rateCommand(command)) {
-                    MyProducer.rate(record.key(), new JSONObject(record.value()));
+                    RateProducer.rate(record.key(), new JSONObject(record.value()));
                 }
             }
         }
     }
 
     private static boolean rateCommand(String command) {
-        return "курс".equals(command) ||
-                "rate".equals(command) ||
-                "kurs".equals(command);
+        return new ArrayList<>(Arrays.asList("kurs", "rate", "курс", "rehc")).contains(command);
     }
 
     private static final Logger logger = LoggerFactory.getLogger(Consumer.class);
