@@ -5,6 +5,7 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
@@ -38,7 +39,8 @@ public class RateProducer {
         ratesArr = (new JSONObject(url)).getJSONObject("query").getJSONObject("results").getJSONArray("rate");
     }
 
-    static void rate(String key, JSONObject jobj) throws IOException {
+    static void rate(ConsumerRecord<String, String> record) throws IOException {
+        JSONObject jobj = new JSONObject(record.value());
         Properties props = new Properties();
         try (Reader propsReader = new FileReader("/kafka.properties")) {
             props.load(propsReader);
@@ -60,7 +62,7 @@ public class RateProducer {
             // it's ok for now not to have connector-id in message
         }
         ans.put("text", text);
-        producer.send(new ProducerRecord<>("to-connector", key, ans.toString()));
+        producer.send(new ProducerRecord<>("to-connector", record.key(), ans.toString()));
         logger.debug("producer send request created");
 
         producer.close();

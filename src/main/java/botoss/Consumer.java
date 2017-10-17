@@ -38,7 +38,7 @@ public class Consumer {
                 logger.info("record from topic: key = " + record.key() + "; value = " + record.value());
                 String command = (new JSONObject(record.value())).getString("command");
                 if (rateCommand(command)) {
-                    RateProducer.rate(record.key(), new JSONObject(record.value()));
+                    RateProducer.rate(record);
                 }
             }
         }
