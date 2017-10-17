@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
@@ -46,7 +45,7 @@ public class Consumer {
     }
 
     private static boolean rateCommand(String command) {
-        return new ArrayList<>(Arrays.asList("kurs", "rate", "курс", "rehc")).contains(command);
+        return Arrays.asList("kurs", "rate", "курс", "rehc").contains(command);
     }
 
     private static final Logger logger = LoggerFactory.getLogger(Consumer.class);
