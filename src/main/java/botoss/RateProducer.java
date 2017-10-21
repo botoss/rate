@@ -41,26 +41,35 @@ public class RateProducer {
     }
 
     static void rate(ConsumerRecord<String, String> record) throws IOException {
-        JSONObject jobj = new JSONObject(record.value());
-
-        JSONArray params = jobj.getJSONArray("params");
-        Double param = 1.;
-        try {
-            if (params.length() > 0)
-                param = Double.parseDouble(params.get(0).toString());
-        } catch (NumberFormatException ignore) {
-        }
-        logger.debug("ratesArr = " + ratesArr);
-        String text = (ratesArr == null) ? "loading..." : getMessage(ratesArr, param);
-        logger.debug("text = " + text);
-
-
-        logger.debug("record = " + record);
-        logger.debug("jobj = " + jobj);
-        sendMessage(record.key(), text);
+        String message = getMessage(new JSONObject(record.value()));
+        sendMessage(record, message);
     }
 
-    private static void sendMessage(String key, String text) throws IOException {
+    private static String getMessage(JSONObject jobj) {
+        JSONArray params = jobj.getJSONArray("params");
+        Double factor = 1.;
+        boolean factorNotExist = true;
+        for (Object param : params) {
+            switch (param.toString()) {
+                case "-f":
+                case "-force":
+                    rate();
+                    break;
+                default:
+                    if (factorNotExist) {
+                        try {
+                            factor = Double.parseDouble(params.get(0).toString());
+                            factorNotExist = false;
+                        } catch (NumberFormatException ignore) {
+                        }
+                    }
+                    break;
+            }
+        }
+        return (ratesArr == null) ? "loading..." : getText(ratesArr, factor);
+    }
+
+    private static void sendMessage(ConsumerRecord<String, String> record, String message) throws IOException {
         Properties props = new Properties();
         try (Reader propsReader = new FileReader("/kafka.properties")) {
             props.load(propsReader);
@@ -68,19 +77,20 @@ public class RateProducer {
         Producer<String, String> producer = new KafkaProducer<>(props);
         logger.debug("producer created");
         JSONObject ans = new JSONObject();
-       /* try {
-            ans.put("connector-id", connectorId);
+        try {
+            ans.put("connector-id", new JSONObject(record.value()).getString("connector-id"));
         } catch (JSONException ignore) {
             // it's ok for now not to have connector-id in message
-        }*/
-        ans.put("text", text);
-        producer.send(new ProducerRecord<>("to-connector", key, ans.toString()));
+        }
+
+        ans.put("text", message);
+        producer.send(new ProducerRecord<>("to-connector", record.key(), ans.toString()));
         logger.debug("producer send request created");
 
         producer.close();
     }
 
-    private static String getMessage(JSONArray arr, Double param) {
+    private static String getText(JSONArray arr, Double param) {
         String text = "";
         for (int i = 0; i < arr.length(); i++) {
             text += arr.getJSONObject(i).getString("Name") + ": ";
