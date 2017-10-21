@@ -49,7 +49,8 @@ public class RateProducer {
                 param = Double.parseDouble(params.get(0).toString());
         } catch (NumberFormatException ignore) {
         }
-        String text = getMessage(ratesArr, param);
+
+        String text = (ratesArr == null) ? "loading..." : getMessage(ratesArr, param);
 
         sendMessage(record.key(), jobj.getString("connector-id"), text);
     }
