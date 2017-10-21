@@ -29,7 +29,8 @@ public class RateProducer {
         try {
             logger.debug("curling yahooapis");
             url = getUrl();
-            logger.debug("curled from yahooapis: " + url);
+            //logger.debug("curled from yahooapis: " + url);
+            logger.debug("curled from yahooapis:  + url");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -49,9 +50,13 @@ public class RateProducer {
                 param = Double.parseDouble(params.get(0).toString());
         } catch (NumberFormatException ignore) {
         }
-
+        logger.debug("ratesArr = " + ratesArr);
         String text = (ratesArr == null) ? "loading..." : getMessage(ratesArr, param);
+        logger.debug("text = " + text);
 
+
+        logger.debug("record = " + record);
+        logger.debug("jobj = " + jobj);
         sendMessage(record.key(), jobj.getString("connector-id"), text);
     }
 
