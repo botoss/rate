@@ -54,7 +54,7 @@ public class RateProducer {
                 case "-f":
                 case "-force":
                     rate();
-                    break;
+                    continue;
                 default:
                     if (factorNotExist) {
                         try {
@@ -63,7 +63,7 @@ public class RateProducer {
                         } catch (NumberFormatException ignore) {
                         }
                     }
-                    break;
+                    continue;
             }
         }
         return (ratesArr == null) ? "loading..." : getText(ratesArr, factor);
