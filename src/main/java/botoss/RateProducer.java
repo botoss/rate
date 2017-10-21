@@ -41,10 +41,7 @@ public class RateProducer {
 
     static void rate(ConsumerRecord<String, String> record) throws IOException {
         JSONObject jobj = new JSONObject(record.value());
-        Properties props = new Properties();
-        try (Reader propsReader = new FileReader("/kafka.properties")) {
-            props.load(propsReader);
-        }
+
         JSONArray params = jobj.getJSONArray("params");
         Double param = 1.;
         try {
@@ -52,23 +49,32 @@ public class RateProducer {
                 param = Double.parseDouble(params.get(0).toString());
         } catch (NumberFormatException ignore) {
         }
-        String text = getText(ratesArr, param);
+        String message = getMessage(ratesArr, param);
+
+        sendMessage(record.key(), jobj.getString("connector-id"), message);
+    }
+
+    private static void sendMessage(String key, String connectorId, String message) throws IOException {
+        Properties props = new Properties();
+        try (Reader propsReader = new FileReader("/kafka.properties")) {
+            props.load(propsReader);
+        }
         Producer<String, String> producer = new KafkaProducer<>(props);
         logger.debug("producer created");
         JSONObject ans = new JSONObject();
         try {
-            ans.put("connector-id", jobj.getString("connector-id"));
+            ans.put("connector-id", connectorId);
         } catch (JSONException ignore) {
             // it's ok for now not to have connector-id in message
         }
-        ans.put("text", text);
-        producer.send(new ProducerRecord<>("to-connector", record.key(), ans.toString()));
+        ans.put("text", message);
+        producer.send(new ProducerRecord<>("to-connector", key, ans.toString()));
         logger.debug("producer send request created");
 
         producer.close();
     }
 
-    private static String getText(JSONArray arr, Double param) {
+    private static String getMessage(JSONArray arr, Double param) {
         String text = "";
         for (int i = 0; i < arr.length(); i++) {
             text += arr.getJSONObject(i).getString("Name") + ": ";
