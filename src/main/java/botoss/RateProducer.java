@@ -41,51 +41,28 @@ public class RateProducer {
 
     static void rate(ConsumerRecord<String, String> record) throws IOException {
         JSONObject jobj = new JSONObject(record.value());
-
-        String text = generateAnswer(jobj.getJSONArray("params"));
-
-
-        sendMessage(record.key(), jobj.getString("connector-id"), text);
-    }
-
-    private static String generateAnswer(JSONArray params) {
-        double factor = 1.;
-        boolean factorNotExist = true;
-        for (Object param : params) {
-            switch (param.toString()) {
-                case "-f":
-                case "-force":
-                    rate();
-                    break;
-                default:
-                    if (factorNotExist) {
-                        try {
-                            factor = Double.parseDouble(param.toString());
-                            factorNotExist = false;
-                        } catch (NumberFormatException ignore) {
-                        }
-                        break;
-                    }
-            }
-        }
-        return getText(ratesArr, factor);
-    }
-
-    private static void sendMessage(String key, String connectorId, String message) throws IOException {
         Properties props = new Properties();
         try (Reader propsReader = new FileReader("/kafka.properties")) {
             props.load(propsReader);
         }
+        JSONArray params = jobj.getJSONArray("params");
+        Double param = 1.;
+        try {
+            if (params.length() > 0)
+                param = Double.parseDouble(params.get(0).toString());
+        } catch (NumberFormatException ignore) {
+        }
+        String text = getText(ratesArr, param);
         Producer<String, String> producer = new KafkaProducer<>(props);
         logger.debug("producer created");
         JSONObject ans = new JSONObject();
         try {
-            ans.put("connector-id", connectorId);
+            ans.put("connector-id", jobj.getString("connector-id"));
         } catch (JSONException ignore) {
             // it's ok for now not to have connector-id in message
         }
-        ans.put("text", message);
-        producer.send(new ProducerRecord<>("to-connector", key, ans.toString()));
+        ans.put("text", text);
+        producer.send(new ProducerRecord<>("to-connector", record.key(), ans.toString()));
         logger.debug("producer send request created");
 
         producer.close();
@@ -109,6 +86,4 @@ public class RateProducer {
             return IOUtils.toString(inputStream);
         }
     }
-
-
 }
