@@ -54,10 +54,13 @@ public class RateProducer {
         }
         String message = getMessage(ratesArr, param);
 
-        sendMessage(record.key(), jobj.getString("connector-id"), props, message);
+       /* sendMessage(record.key(), jobj.getString("connector-id"), props, message);
     }
 
-    private static void sendMessage(String key, String connectorId, Properties props, String message) {
+    private static void sendMessage(String key, String connectorId, Properties props, String message) {*/
+        String key = record.key();
+        String connectorId =jobj.getString("connector-id");
+
         Producer<String, String> producer = new KafkaProducer<>(props);
         logger.debug("producer created");
         JSONObject ans = new JSONObject();
