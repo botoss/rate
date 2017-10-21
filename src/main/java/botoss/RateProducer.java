@@ -54,16 +54,16 @@ public class RateProducer {
                 case "-f":
                 case "-force":
                     rate();
-                    continue;
+                    break;
                 default:
                     if (factorNotExist) {
                         try {
-                            factor = Double.parseDouble(params.get(0).toString());
+                            factor = Double.parseDouble(param.toString());
                             factorNotExist = false;
                         } catch (NumberFormatException ignore) {
                         }
                     }
-                    continue;
+                    break;
             }
         }
         return (ratesArr == null) ? "loading..." : getText(ratesArr, factor);
