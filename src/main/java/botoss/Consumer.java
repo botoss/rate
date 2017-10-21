@@ -27,7 +27,7 @@ public class Consumer {
         new Thread(() -> {
             try {
                 RateProducer.rate();
-                TimeUnit.MINUTES.sleep(30);
+                TimeUnit.MINUTES.sleep(10);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
