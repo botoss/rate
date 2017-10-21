@@ -57,10 +57,10 @@ public class RateProducer {
 
         logger.debug("record = " + record);
         logger.debug("jobj = " + jobj);
-        sendMessage(record.key(), jobj.getString("connector-id"), text);
+        sendMessage(record.key(), text);
     }
 
-    private static void sendMessage(String key, String connectorId, String text) throws IOException {
+    private static void sendMessage(String key, String text) throws IOException {
         Properties props = new Properties();
         try (Reader propsReader = new FileReader("/kafka.properties")) {
             props.load(propsReader);
@@ -68,11 +68,11 @@ public class RateProducer {
         Producer<String, String> producer = new KafkaProducer<>(props);
         logger.debug("producer created");
         JSONObject ans = new JSONObject();
-        try {
+       /* try {
             ans.put("connector-id", connectorId);
         } catch (JSONException ignore) {
             // it's ok for now not to have connector-id in message
-        }
+        }*/
         ans.put("text", text);
         producer.send(new ProducerRecord<>("to-connector", key, ans.toString()));
         logger.debug("producer send request created");
