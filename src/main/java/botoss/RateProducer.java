@@ -58,19 +58,19 @@ public class RateProducer {
     }
 
     private static void sendMessage(String key, String connectorId, Properties props, String message) {*/
-        String key = record.key();
-        String connectorId =jobj.getString("connector-id");
+       /* String key = record.key();
+        String connectorId = jobj.getString("connector-id");*/
 
         Producer<String, String> producer = new KafkaProducer<>(props);
         logger.debug("producer created");
         JSONObject ans = new JSONObject();
         try {
-            ans.put("connector-id", connectorId);
+            ans.put("connector-id", jobj.getString("connector-id"));
         } catch (JSONException ignore) {
             // it's ok for now not to have connector-id in message
         }
         ans.put("text", message);
-        producer.send(new ProducerRecord<>("to-connector", key, ans.toString()));
+        producer.send(new ProducerRecord<>("to-connector", record.key(), ans.toString()));
         logger.debug("producer send request created");
 
         producer.close();
