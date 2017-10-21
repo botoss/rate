@@ -80,7 +80,7 @@ public class RateProducer {
             text += arr.getJSONObject(i).getString("Name") + ": ";
             text += Double.toString((Math.round(Double.parseDouble(arr.getJSONObject(i).getString("Rate")) * param * 1000)) / 1000.) + "\n";
         }
-        return text;
+        return text + "\ntest 0";
     }
 
     private static String getUrl() throws IOException {
