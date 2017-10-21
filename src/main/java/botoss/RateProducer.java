@@ -52,14 +52,12 @@ public class RateProducer {
                 param = Double.parseDouble(params.get(0).toString());
         } catch (NumberFormatException ignore) {
         }
-        String text = getText(ratesArr, param);
+        String text = getMessage(ratesArr, param);
 
        /* sendMessage(record.key(), jobj.getString("connector-id"), props, message);
     }
 
     private static void sendMessage(String key, String connectorId, Properties props, String message) {*/
-       /* String key = record.key();
-        String connectorId = jobj.getString("connector-id");*/
 
         Producer<String, String> producer = new KafkaProducer<>(props);
         logger.debug("producer created");
@@ -76,7 +74,7 @@ public class RateProducer {
         producer.close();
     }
 
-    private static String getText(JSONArray arr, Double param) {
+    private static String getMessage(JSONArray arr, Double param) {
         String text = "";
         for (int i = 0; i < arr.length(); i++) {
             text += arr.getJSONObject(i).getString("Name") + ": ";
