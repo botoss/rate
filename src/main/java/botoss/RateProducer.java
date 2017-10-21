@@ -41,7 +41,10 @@ public class RateProducer {
 
     static void rate(ConsumerRecord<String, String> record) throws IOException {
         JSONObject jobj = new JSONObject(record.value());
-
+        Properties props = new Properties();
+        try (Reader propsReader = new FileReader("/kafka.properties")) {
+            props.load(propsReader);
+        }
         JSONArray params = jobj.getJSONArray("params");
         Double param = 1.;
         try {
@@ -51,14 +54,10 @@ public class RateProducer {
         }
         String message = getMessage(ratesArr, param);
 
-        sendMessage(record.key(), jobj.getString("connector-id"), message);
+        sendMessage(record.key(), jobj.getString("connector-id"), props, message);
     }
 
-    private static void sendMessage(String key, String connectorId, String message) throws IOException {
-        Properties props = new Properties();
-        try (Reader propsReader = new FileReader("/kafka.properties")) {
-            props.load(propsReader);
-        }
+    private static void sendMessage(String key, String connectorId, Properties props, String message) {
         Producer<String, String> producer = new KafkaProducer<>(props);
         logger.debug("producer created");
         JSONObject ans = new JSONObject();
