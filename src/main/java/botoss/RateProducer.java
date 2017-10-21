@@ -52,7 +52,7 @@ public class RateProducer {
                 param = Double.parseDouble(params.get(0).toString());
         } catch (NumberFormatException ignore) {
         }
-        String message = getMessage(ratesArr, param);
+        String text = getText(ratesArr, param);
 
        /* sendMessage(record.key(), jobj.getString("connector-id"), props, message);
     }
@@ -69,14 +69,14 @@ public class RateProducer {
         } catch (JSONException ignore) {
             // it's ok for now not to have connector-id in message
         }
-        ans.put("text", message);
+        ans.put("text", text);
         producer.send(new ProducerRecord<>("to-connector", record.key(), ans.toString()));
         logger.debug("producer send request created");
 
         producer.close();
     }
 
-    private static String getMessage(JSONArray arr, Double param) {
+    private static String getText(JSONArray arr, Double param) {
         String text = "";
         for (int i = 0; i < arr.length(); i++) {
             text += arr.getJSONObject(i).getString("Name") + ": ";
