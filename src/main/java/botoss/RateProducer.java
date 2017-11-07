@@ -66,7 +66,7 @@ public class RateProducer {
                     break;
             }
         }
-        return (ratesArr == null) ? "loading..." : getText(ratesArr, factor);
+        return (ratesArr == null) ? "USD/RUB: ██.███\nEUR/RUB: ██.███" : getText(ratesArr, factor);
     }
 
     private static void sendMessage(ConsumerRecord<String, String> record, String message) throws IOException {
