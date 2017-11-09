@@ -36,7 +36,7 @@ public class CryptoSource implements Source {
             InputStream inputStream = response.getEntity().getContent();
             info = IOUtils.toString(inputStream);
         }
-        ratesArr.put(val, (Double) new JSONObject(info).getJSONObject("ticker").get("prise"));
+        ratesArr.put(val, Double.parseDouble(new JSONObject(info).getJSONObject("ticker").get("price").toString()));
     }
 
     @Override

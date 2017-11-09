@@ -22,6 +22,10 @@ import java.util.Properties;
 
 
 public class RateProducer {
+    public static void main(String[] args) throws IOException {
+        rate();
+        System.out.println(rates);
+    }
     private static final Logger logger = LoggerFactory.getLogger(RateProducer.class);
     private static volatile Map<String, Double> rates = new HashMap<>();
     private static Source source = new CryptoSource();
