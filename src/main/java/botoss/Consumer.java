@@ -47,12 +47,19 @@ public class Consumer {
                     if (btcCommand(command)){
                         RateProducer.btc(record);
                     }
+                    if (maxBtcCommand(command)){
+                        RateProducer.maxBtc(record);
+                    }
                 } catch (JSONException e) {
                     logger.error("invalid JSON");
                     continue;
                 }
             }
         }
+    }
+
+    private static boolean maxBtcCommand(String command) {
+        return Arrays.asList("сколькоумаксабитков", "сколькобитковумакса").contains(command);
     }
 
     private static boolean btcCommand(String command) {
