@@ -31,7 +31,7 @@ public class Consumer {
             try {
                 RateProducer.rate();
                 TimeUnit.MINUTES.sleep(60);
-            } catch (InterruptedException e) {
+            } catch (InterruptedException|IOException e) {
                 logger.error("Error on time thread", e);
             }
         }).start();
@@ -40,9 +40,12 @@ public class Consumer {
             for (ConsumerRecord<String, String> record : records) {
                 logger.info("record from topic: key = " + record.key() + "; value = " + record.value());
                 try {
-                    String command = (new JSONObject(record.value())).getString("command");
+                    String command = (new JSONObject(record.value())).getString("command").toLowerCase();
                     if (rateCommand(command)) {
                         RateProducer.rate(record);
+                    }
+                    if (btcCommand(command)){
+                        RateProducer.btc(record);
                     }
                 } catch (JSONException e) {
                     logger.error("invalid JSON");
@@ -50,6 +53,10 @@ public class Consumer {
                 }
             }
         }
+    }
+
+    private static boolean btcCommand(String command) {
+        return Arrays.asList("btc", "биток", "битки").contains(command);
     }
 
     private static boolean rateCommand(String command) {

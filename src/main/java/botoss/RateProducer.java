@@ -1,5 +1,6 @@
 package botoss;
 
+import botoss.source.CryptoSource;
 import botoss.source.ExchangeSource;
 import botoss.source.Source;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -23,28 +24,34 @@ import java.util.Properties;
 public class RateProducer {
     private static final Logger logger = LoggerFactory.getLogger(RateProducer.class);
     private static volatile Map<String, Double> rates = new HashMap<>();
-    private static Source source = new ExchangeSource();
+    private static Source source = new CryptoSource();
+    private static Double factor = 1.;
+    private static Boolean factorNotExist = true;
 
     static void rate(ConsumerRecord<String, String> record) throws IOException, JSONException {
-        String message = getMessage(new JSONObject(record.value()));
-        sendMessage(record, message);
+        parseParams(new JSONObject(record.value()));
+        sendMessage(record, getRateMessage());
     }
 
-    static void rate() {
+    static void btc(ConsumerRecord<String, String> record) throws IOException, JSONException {
+        parseParams(new JSONObject(record.value()));
+        sendMessage(record, getBtcMessage());
+    }
+
+    static void rate() throws IOException {
         source.takeInfo();
         rates = source.getRubInfo();
     }
 
-    private static String getMessage(JSONObject jobj) {
+    private static void parseParams(JSONObject jobj) throws IOException {
+        factorNotExist = true;
         JSONArray params = jobj.getJSONArray("params");
-        Double factor = 1.;
-        boolean factorNotExist = true;
         for (Object param : params) {
             switch (param.toString()) {
-                /*case "-f":
+                case "-f":
                 case "-force":
                     rate();
-                    break;*/
+                    break;
                 default:
                     if (factorNotExist) {
                         try {
@@ -56,12 +63,15 @@ public class RateProducer {
                     break;
             }
         }
-        return getText(factor);
     }
 
-    private static String getText(Double factor) {
+    private static String getRateMessage() {
         return "USD/RUB: " + ((rates.get("USD") == null) ? "██.███" : (Math.round(rates.get("USD") * factor * 1000)) / 1000.) +
                 "\nEUR/RUB: " + ((rates.get("EUR") == null) ? "██.███" : (Math.round(rates.get("EUR") * factor * 1000)) / 1000.);
+    }
+
+    private static String getBtcMessage() {
+        return "Тут могла бы быть ваша реклама!";
     }
 
     private static void sendMessage(ConsumerRecord<String, String> record, String message) throws IOException {

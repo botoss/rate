@@ -17,9 +17,7 @@ import java.util.Map;
 public class ExchangeSource implements Source {
     private static final Logger logger = LoggerFactory.getLogger(ExchangeSource.class);
     private static final String RATE_URL = "https://openexchangerates.org/api/latest.json?app_id=74ea1d360294459283dd6827b2047679";
-    private static String url = "";
     private static volatile JSONObject ratesArr;
-
     /*          "base": "USD",
                 "ratesArr": {
                         ...
@@ -31,29 +29,18 @@ public class ExchangeSource implements Source {
                         ...
                 }
     */
-    static {
-        try {
-            logger.debug("curling openexchangerates");
-            url = getUrl();
-            logger.debug("curled from openexchangerates: " + url);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
 
-    private static String getUrl() throws IOException {
+    @Override
+    public boolean takeInfo() throws IOException {
+        String info;
         HttpGet req = new HttpGet(RATE_URL);
         req.setHeader("Content-Type", "application/json");
         try (CloseableHttpClient client = HttpClients.createDefault();
              CloseableHttpResponse response = client.execute(req)) {
             InputStream inputStream = response.getEntity().getContent();
-            return IOUtils.toString(inputStream);
+            info = IOUtils.toString(inputStream);
         }
-    }
-
-    @Override
-    public boolean takeInfo() {
-        ratesArr = new JSONObject(url).getJSONObject("rates");
+        ratesArr = new JSONObject(info).getJSONObject("rates");
         return true;
     }
 
