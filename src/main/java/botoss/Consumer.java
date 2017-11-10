@@ -59,7 +59,7 @@ public class Consumer {
     }
 
     private static boolean maxBtcCommand(String command) {
-        return Arrays.asList("сколькоумаксабитков", "сколькобитковумакса").contains(command);
+        return Arrays.asList("сколькоумаксабитков", "сколькобитковумакса", "maxbtc", ",биткимакса").contains(command);
     }
 
     private static boolean btcCommand(String command) {
