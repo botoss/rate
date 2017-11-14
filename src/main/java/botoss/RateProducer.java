@@ -56,6 +56,8 @@ public class RateProducer {
             switch (param.toString()) {
                 case "-f":
                 case "-force":
+                case "-ф":
+                case "-форс":
                     rate();
                     break;
                 default:
