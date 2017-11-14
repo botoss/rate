@@ -50,6 +50,7 @@ public class RateProducer {
 
     private static void parseParams(JSONObject jobj) throws IOException {
         factorNotExist = true;
+        factor = 1.;
         JSONArray params = jobj.getJSONArray("params");
         for (Object param : params) {
             switch (param.toString()) {
