@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.io.Reader;
 import java.util.Arrays;
 import java.util.Properties;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 public class Consumer {
@@ -27,14 +28,16 @@ public class Consumer {
         KafkaConsumer<String, String> consumer = new KafkaConsumer<>(props);
         consumer.subscribe(Arrays.asList("to-module"));
         logger.info("Subscribed to topic");
-        new Thread(() -> {
+
+        Thread update = new Thread(() -> {
             try {
                 RateProducer.rate();
-                TimeUnit.MINUTES.sleep(60);
-            } catch (InterruptedException|IOException e) {
+            } catch (IOException e) {
                 logger.error("Error on time thread", e);
             }
-        }).start();
+        });
+        new ScheduledThreadPoolExecutor(1).scheduleAtFixedRate(update, 0, 30, TimeUnit.MINUTES);
+
         while (true) {
             ConsumerRecords<String, String> records = consumer.poll(100);
             for (ConsumerRecord<String, String> record : records) {
@@ -44,10 +47,10 @@ public class Consumer {
                     if (rateCommand(command)) {
                         RateProducer.rate(record);
                     }
-                    if (btcCommand(command)){
+                    if (btcCommand(command)) {
                         RateProducer.btc(record);
                     }
-                    if (maxBtcCommand(command)){
+                    if (maxBtcCommand(command)) {
                         RateProducer.maxBtc(record);
                     }
                 } catch (JSONException e) {
